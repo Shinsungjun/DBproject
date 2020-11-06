@@ -35,8 +35,16 @@ public class Window extends JFrame{
         final Object header[] = {"Check","Name", "Ssn", "Bdate", "Address",
                             "Sex", "Salary", "SuperVisor", "Dname"};
         Object content[][] = {{"false","John Smith", "123456789","1965-01-09","731 Fondren, Houston, TX",
-                            "M", "30000.00", "Franklin Wong", "Research"}};
-        dtm = new DefaultTableModel(content, header);
+                            "M", "30000.00", "Franklin Wong", "Research"},
+                {"true","John SS", "123456789","1965-01-09","731 Fondren, Houston, TX",
+                        "M", "30000.00", "Franklin Wong", "Research"}};
+        dtm = new DefaultTableModel(content, header){
+            public boolean isCellEditable(int i, int c){
+                //if(c == 0) return true;
+                //return false;
+                return true;
+            }
+        };
         table = new JTable(dtm);
         table.getColumnModel().getColumn(0).setCellRenderer(new TableCell());
         table.getColumnModel().getColumn(0).setCellEditor(new TableCell());
@@ -53,7 +61,6 @@ public class Window extends JFrame{
         JCheckBox employee_check;
         public TableCell(){
             employee_check = new JCheckBox();
-
             employee_check.addActionListener(e -> {
                 System.out.println(table.getValueAt(table.getSelectedRow(), 1));
             });
