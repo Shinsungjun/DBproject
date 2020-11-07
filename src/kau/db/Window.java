@@ -28,10 +28,12 @@ public class Window extends JFrame {
     JButton deleteButton;
     JButton updateButton;
     JTextField salaryTextField;
+    JTextField SsnTextField;
     JLabel chooseText;
     JLabel numberofPeople;
     JLabel numberOfPeopleText;
     JLabel newSalaryText;
+    JLabel SsnText;
     JLabel scopeText;
     JTable table;
     DefaultTableModel dtm;
@@ -42,7 +44,7 @@ public class Window extends JFrame {
     ArrayList<ArrayList<String>> contents;
     ArrayList<Boolean> isAttributeChecked;
     JScrollPane tableScrollPane;
-    String attribute[] = new String[]{"Check", "Name", "Ssn", "Bdate", "Address", "Sex", "Salary", "SuperVisor", "Dname"};
+    String attribute[] = new String[]{"Name", "Ssn", "Bdate", "Address", "Sex", "Salary", "SuperVisor", "Dname"};
     public Window() throws SQLException {
         super("Company DB");
         setLayout(null);
@@ -90,7 +92,6 @@ public class Window extends JFrame {
         ResultSet r = s.executeQuery();
         while(r.next()) {
             ArrayList<String> temp = new ArrayList<>();
-            temp.add("false");
             for (int i = 1; i < 9; i++) {
                 temp.add(r.getString(i));
             }
@@ -127,7 +128,6 @@ public class Window extends JFrame {
         ResultSet r = p.executeQuery();
         while(r.next()) {
             ArrayList<String> temp = new ArrayList<>();
-            temp.add("false");
             for (int i = 1; i < isAttributeChecked.size()+1; i++) {
                 if(isAttributeChecked.get(i-1))
                     temp.add(r.getString(i));
@@ -142,9 +142,13 @@ public class Window extends JFrame {
         scopeText = new JLabel("Scope");
         this.add(scopeText);
         scopeText.setBounds(15, 15, 100, 20);
-        newSalaryText = new JLabel("New Salary :");
+        SsnText = new JLabel("Ssn");
+        this.add(SsnText);
+        SsnText.setBounds(540, 450, 100, 20);
+        this.add(SsnText);
+        newSalaryText = new JLabel("New Salary");
         this.add(newSalaryText);
-        newSalaryText.setBounds(525, 420, 100, 20);
+        newSalaryText.setBounds(615, 450, 100, 20);
         numberOfPeopleText = new JLabel("Number of People : ");
         this.add(numberOfPeopleText);
         numberOfPeopleText.setBounds(30, 410, 200, 20);
@@ -196,28 +200,18 @@ public class Window extends JFrame {
             content.add(i, temp);
         }
         dtm =new DefaultTableModel(content, header);
-//        dtm = new DefaultTableModel(content, header){
-//            public boolean isCellEditable(int i, int c){
-//                if(c == 0) return true;
-//                return false;
-//            }
-//        };
         table = new JTable(dtm);
-        //table.setCellEditor(new TableCell());
-        table.getColumnModel().getColumn(0).setCellRenderer(new TableCell(table));
-        table.getColumnModel().getColumn(0).setCellEditor(new TableCell(table));
         tableScrollPane = new JScrollPane(table);
         this.add(tableScrollPane);
         tableScrollPane.setBounds(20,90,960,310);
     }
     public void create_table(ArrayList<String> attributeHeader) {
          //값을 받아서 넘어온 애들로만 만들기
-        header.removeAllElements(); //DefaultTableModel가 Array밖에 안되서 ArrayList -> Array 변환
-        content.removeAllElements(); //query문을 통해 받은 값들이 모두 contents에 저장되어 있음. contents -> ArrayList<ArrayList<String>>
-        header.add("Check");
+        header.removeAllElements();
+        content.removeAllElements();
         for(int i=0; i<isAttributeChecked.size(); i++){
             if(isAttributeChecked.get(i)){
-                header.add(attribute[i+1]);
+                header.add(attribute[i]);
             }
         }
         for(int i =0; i<contents.size(); i++){
@@ -232,8 +226,6 @@ public class Window extends JFrame {
         DefaultTableModel m = (DefaultTableModel)table.getModel();
         m.fireTableStructureChanged();
         m.fireTableDataChanged();
-        table.getColumnModel().getColumn(0).setCellRenderer(new TableCell(table));
-        table.getColumnModel().getColumn(0).setCellEditor(new TableCell(table));
     }
 
     public void add_buttons_at_frame(){
@@ -284,6 +276,9 @@ public class Window extends JFrame {
         this.add(updateButton);
         salaryTextField = new JTextField(10);
         salaryTextField.setBounds(600, 410, 100, 40);
+        SsnTextField =  new JTextField(10);
+        SsnTextField.setBounds(500, 410, 100, 40);
+        this.add(SsnTextField);
         this.add(salaryTextField);
     }
 
