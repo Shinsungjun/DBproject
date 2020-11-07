@@ -279,6 +279,25 @@ public class Window extends JFrame {
         deleteButton.setBounds(820, 410, 100,40);
         this.add(deleteButton);
         updateButton = new JButton("Update");
+        updateButton.addActionListener(e -> {
+            if(start){
+                try {
+                    update_db();
+                    start = false;
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            else {
+                if(header.contains("Name") || header.contains("Ssn")){
+                    try {
+                        update_db();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                }
+            }
+        });
         updateButton.setBounds(700, 410, 100, 40);
         this.add(updateButton);
         salaryTextField = new JTextField(10);
@@ -301,6 +320,13 @@ public class Window extends JFrame {
     }
 
     public void update_db() throws SQLException {
-
+        String ssn = SsnTextField.getText();
+        String salary = salaryTextField.getText();
+        String stmt = "update employee set salary = ? where ssn = ?";
+        PreparedStatement p = con.prepareStatement(stmt);
+        p.setString(1, salary);
+        p.setString(2, ssn);
+        p.executeUpdate();
+        create_table();
     }
 }
