@@ -45,6 +45,7 @@ public class Window extends JFrame {
     ArrayList<Boolean> isAttributeChecked;
     JScrollPane tableScrollPane;
     String attribute[] = new String[]{"Name", "Ssn", "Bdate", "Address", "Sex", "Salary", "SuperVisor", "Dname"};
+    Boolean start;
     public Window() throws SQLException {
         super("Company DB");
         setLayout(null);
@@ -54,6 +55,7 @@ public class Window extends JFrame {
         add_checkbox_at_atrributeJpanel();
         add_buttons_at_frame();
         add_texts();
+        start = true;
         //frame 크기지정
         setSize(1000, 500);
         //창보이게 하기
@@ -192,7 +194,7 @@ public class Window extends JFrame {
             header.add(attribute[i]);
         }
         content = new Vector<Vector<String>>(10);
-        for(int i =0; i<8; i++){
+        for(int i =0; i<contents.size(); i++){
             Vector temp = new Vector(9);
             for(int j = 0; j<contents.get(i).size(); j++){
                 temp.add(j, contents.get(i).get(j));
@@ -205,7 +207,7 @@ public class Window extends JFrame {
         this.add(tableScrollPane);
         tableScrollPane.setBounds(20,90,960,310);
     }
-    public void create_table(ArrayList<String> attributeHeader) {
+    public void create_table() {
          //값을 받아서 넘어온 애들로만 만들기
         header.removeAllElements();
         content.removeAllElements();
@@ -221,8 +223,6 @@ public class Window extends JFrame {
             }
             content.add(i, temp);
         }
-        System.out.println(content);
-        System.out.println(header);
         DefaultTableModel m = (DefaultTableModel)table.getModel();
         m.fireTableStructureChanged();
         m.fireTableDataChanged();
@@ -239,11 +239,8 @@ public class Window extends JFrame {
         searchButton.addActionListener(e -> {
             isAttributeChecked.clear();
             //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
-            header.clear();
-            header.add("Check");
             for(int i =0; i<attributeCbs.size(); i++){
                 if(attributeCbs.get(i).isSelected()){
-                    header.add(attributeCbs.get(i).getText());
                     isAttributeChecked.add(true);
                 }
                 else isAttributeChecked.add(false);
@@ -255,18 +252,28 @@ public class Window extends JFrame {
                 throwables.printStackTrace();
             }
             //다시 조회한 db를 통해 새로운 테이블 만들기
-            create_table(header);
+            create_table();
         });
 
         this.add(searchButton);
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> {
-            System.out.println(header);
-            if(header.contains("Name") || header.contains("Ssn")){
-                System.out.println("have!");
+            if(start){
+                try {
+                    delete_db();
+                    start = false;
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
             else {
-                System.out.println("No!");
+                if(header.contains("Name") || header.contains("Ssn")){
+                    try {
+                        delete_db();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                }
             }
         });
         deleteButton.setBounds(820, 410, 100,40);
@@ -281,5 +288,19 @@ public class Window extends JFrame {
         this.add(SsnTextField);
         this.add(salaryTextField);
     }
+    public void delete_db() throws SQLException {
+        String ssn = SsnTextField.getText();
+        System.out.println(ssn);
+        String stmt = "delete from EMPLOYEE " +
+                "where ssn="+ssn+" and (ssn not in (select mgr_ssn " +
+                "from DEPARTMENT) or super_ssn is null)";
+        PreparedStatement p = con.prepareStatement(stmt);
+        System.out.println(p);
+        p.executeUpdate();
+        create_table();
+    }
 
+    public void update_db() throws SQLException {
+
+    }
 }
