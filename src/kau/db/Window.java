@@ -214,9 +214,10 @@ public class Window extends JFrame {
          //값을 받아서 넘어온 애들로만 만들기
         header.removeAllElements(); //DefaultTableModel가 Array밖에 안되서 ArrayList -> Array 변환
         content.removeAllElements(); //query문을 통해 받은 값들이 모두 contents에 저장되어 있음. contents -> ArrayList<ArrayList<String>>
+        header.add("Check");
         for(int i=0; i<contents.size(); i++){
             if(isAttributeChecked.get(i)){
-                header.add(attribute[i]);
+                header.add(attribute[i+1]);
             }
         }
         for(int i =0; i<contents.size(); i++){
