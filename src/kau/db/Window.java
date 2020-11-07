@@ -1,11 +1,16 @@
 package kau.db;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class Window extends JFrame {
     JPanel attributeJpanel;
@@ -30,12 +35,13 @@ public class Window extends JFrame {
     JLabel scopeText;
     JTable table;
     DefaultTableModel dtm;
-    Object header[];
-    Object content[][];
+    Vector header;
+    Vector<Vector<String>> content;
     String department[] = {"All", "Headquarters", "Administration", "Research"};
     ArrayList<JCheckBox> attributeCbs;
     ArrayList<ArrayList<String>> contents;
     ArrayList<Boolean> isAttributeChecked;
+    JScrollPane tableScrollPane;
     public Window() throws SQLException {
         super("Company DB");
         setLayout(null);
@@ -175,46 +181,76 @@ public class Window extends JFrame {
         attributeJpanel.setBounds(280,15,500,70);
     }
     public void init_table(){
-        header = new Object[]{"Check", "Name", "Ssn", "Bdate", "Address",
-                "Sex", "Salary", "SuperVisor", "Dname"}; //값을 받아서 넘어온 애들로만 만들기
-        content = new Object[contents.size()][];
+        System.out.println("hello!");
+        header = new Vector<String>(8);
+        header.add("Check");
+        header.add("Name");
+        header.add("Ssn");
+        header.add("Bdate");
+        header.add("Address");
+        header.add("Sex");
+        header.add("Salary");
+        header.add("SuperVisor");
+        header.add("Dname");//값을 받아서 넘어온 애들로만 만들기
+        content = new Vector<Vector<String>>(10);
         for(int i =0; i<8; i++){
-            content[i] = contents.get(i).toArray();
-        }
-        dtm = new DefaultTableModel(content, header){
-            public boolean isCellEditable(int i, int c){
-                //if(c == 0) return true;
-                //return false;
-                return true;
+            Vector temp = new Vector(9);
+            for(int j = 0; j<contents.get(i).size(); j++){
+                temp.add(j, contents.get(i).get(j));
             }
-        };
+            content.add(i, temp);
+        }
+        dtm =new DefaultTableModel(content, header);
+//        dtm = new DefaultTableModel(content, header){
+//            public boolean isCellEditable(int i, int c){
+//                if(c == 0) return true;
+//                return false;
+//            }
+//        };
         table = new JTable(dtm);
-        table.getColumnModel().getColumn(0).setCellRenderer(new TableCell());
-        table.getColumnModel().getColumn(0).setCellEditor(new TableCell());
-        JScrollPane scrollpane = new JScrollPane(table);
-        this.add(scrollpane);
-        scrollpane.setBounds(20,90,960,310);
+        //table.setCellEditor(new TableCell());
+        table.getColumnModel().getColumn(0).setCellRenderer(new TableCell(table));
+        table.getColumnModel().getColumn(0).setCellEditor(new TableCell(table));
+        tableScrollPane = new JScrollPane(table);
+        this.add(tableScrollPane);
+        tableScrollPane.setBounds(20,90,960,310);
     }
     public void create_table(ArrayList<String> attributeHeader) {
          //값을 받아서 넘어온 애들로만 만들기
-        header = attributeHeader.toArray();
-        content = new Object[contents.size()][];
+        header.removeAllElements(); //DefaultTableModel가 Array밖에 안되서 ArrayList -> Array 변환
+        content.removeAllElements(); //query문을 통해 받은 값들이 모두 contents에 저장되어 있음. contents -> ArrayList<ArrayList<String>>
+        header.add("Check");
+        header.add("Name");
+        header.add("Ssn");
         for(int i =0; i<contents.size(); i++){
-            content[i] = contents.get(i).toArray();
-        }
-        dtm = new DefaultTableModel(content, header){
-            public boolean isCellEditable(int i, int c){
-                if(c == 0) return true;
-                return false;
+            Vector temp = new Vector(9);
+            for(int j = 0; j<contents.get(i).size(); j++){
+                temp.add(j, contents.get(i).get(j));
             }
-        };
-        table = new JTable(dtm);
-        table.getColumnModel().getColumn(0).setCellRenderer(new TableCell());
-        table.getColumnModel().getColumn(0).setCellEditor(new TableCell());
-        JScrollPane scrollpane = new JScrollPane(table);
-        this.add(scrollpane);
-        scrollpane.setBounds(20,90,960,310);
+            content.add(i, temp);
+        }
+        System.out.println(content);
+        System.out.println(header);
+//        for(int i =0; i<contents.size(); i++){
+//            content[i] = contents.get(i).toArray();
+//        } //contents안에 있는 ArrayList 를 Array로 변경하여 2차원 배열로 변경하는 코드. ArrayList<ArrayList<String>> -> Object[][]
+        DefaultTableModel m = (DefaultTableModel)table.getModel();
+        m.fireTableStructureChanged();
+        m.fireTableDataChanged();
+//        dtm = new DefaultTableModel(content, header){
+//            public boolean isCellEditable(int i, int c){
+//                if(c == 0) return true;
+//                return false;
+//            }
+//        };
+//        table = new JTable(dtm);
+        table.getColumnModel().getColumn(0).setCellRenderer(new TableCell(table));
+        table.getColumnModel().getColumn(0).setCellEditor(new TableCell(table));
+//        tableScrollPane = new JScrollPane(table);
+//        this.add(tableScrollPane);
+//        tableScrollPane.setBounds(20,90,960,310);
     }
+
     public void add_buttons_at_frame(){
         departComboBox = new JComboBox<String>(department);
         isAttributeChecked = new ArrayList<>();
@@ -228,12 +264,10 @@ public class Window extends JFrame {
             //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
             header.clear();
             header.add("Check");
-            int total_select = 0;
             for(int i =0; i<attributeCbs.size(); i++){
                 if(attributeCbs.get(i).isSelected()){
                     header.add(attributeCbs.get(i).getText());
                     isAttributeChecked.add(true);
-                    total_select++;
                 }
                 else isAttributeChecked.add(false);
             }
@@ -258,28 +292,5 @@ public class Window extends JFrame {
         salaryTextField.setBounds(600, 410, 100, 40);
         this.add(salaryTextField);
     }
-    class TableCell extends AbstractCellEditor implements TableCellEditor, TableCellRenderer{
-        JCheckBox employee_check;
-        public TableCell(){
-            employee_check = new JCheckBox();
-            employee_check.addActionListener(e -> {
-                System.out.println(table.getValueAt(table.getSelectedRow(), 2));
-            });
-        }
-        @Override
-        public Object getCellEditorValue(){
-            //TODO Auto-generated method stub
-            return null;
-        }
 
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            return employee_check;
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            return employee_check;
-        }
-    }
 }
