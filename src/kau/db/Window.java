@@ -33,6 +33,7 @@ public class Window extends JFrame {
     Object content[][];
     String department[] = {"All", "Headquarters", "Administration", "Research"};
     ArrayList<JCheckBox> attributeCbs;
+    ArrayList<ArrayList<String>> contents;
     public Window() throws SQLException {
         super("Company DB");
         setLayout(null);
@@ -41,6 +42,8 @@ public class Window extends JFrame {
         add_checkbox_at_atrributeJpanel();
         add_buttons_at_frame();
         add_texts();
+        contents = new ArrayList<ArrayList<String>>();
+        init_table_db();
         init_table();
         //frame 크기지정
         setSize(1000, 500);
@@ -48,20 +51,31 @@ public class Window extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+    void init_table_db() throws SQLException{
+        String stmt1 = "select distinct CONCAT(employee.fname,\" \",employee.minit,\" \",employee.lname)name, employee.ssn, employee.Bdate, employee.Address, employee.sex, employee.salary," +
+                " if(employee.super_ssn is NULL, 'NULL' , CONCAT(mgr.fname,\" \",mgr.minit,\" \",mgr.lname))supermgr_name, dname \n" +
+                "FROM employee, employee as mgr, department \n" +
+                "WHERE department.dnumber =  employee.dno and (mgr.ssn = employee.super_ssn or employee.super_ssn is NULL)";
+        PreparedStatement s = con.prepareStatement(stmt1);
+        ResultSet r = s.executeQuery();
+        while(r.next()) {
+            ArrayList<String> temp = new ArrayList<>();
+            temp.add("false");
+            for (int i = 1; i < 9; i++) {
+                temp.add(r.getString(i));
+            }
+            contents.add(temp);
+        }
+    }
     void test_db() throws SQLException{
         String stmt1 = "select Lname, Salary from EMPLOYEE";
         PreparedStatement p = con.prepareStatement(stmt1);
         ResultSet r = p.executeQuery();
 
-        while(r.next()){
+        while(r.next()) {
             String lname = r.getString(1);
             String salary = r.getString(2);
-            System.out.println(lname +" " + salary);
-        }
-        try {
-            if (con != null)
-                con.close();
-        } catch (SQLException e) {
+            System.out.println(lname + " " + salary);
         }
     }
     void connect_db() {
@@ -131,10 +145,10 @@ public class Window extends JFrame {
     public void init_table(){
         header = new Object[]{"Check", "Name", "Ssn", "Bdate", "Address",
                 "Sex", "Salary", "SuperVisor", "Dname"}; //값을 받아서 넘어온 애들로만 만들기
-        content = new Object[][]{{"false","John Smith", "123456789","1965-01-09","731 Fondren, Houston, TX",
-                "M", "30000.00", "Franklin Wong", "Research"},
-                {"true","John SS", "123456789","1965-01-09","731 Fondren, Houston, TX",
-                        "M", "30000.00", "Franklin Wong", "Research"}};
+        content = new Object[contents.size()][];
+        for(int i =0; i<8; i++){
+            content[i] = contents.get(i).toArray();
+        }
         dtm = new DefaultTableModel(content, header){
             public boolean isCellEditable(int i, int c){
                 //if(c == 0) return true;
