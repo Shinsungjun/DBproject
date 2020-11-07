@@ -1,31 +1,34 @@
 package kau.db;
+
+import java.util.ArrayList;
+
 public class DataOfEmployee {
     // DATA 저장 방식은 ArrayList로 변경해보자
-    private String name,ssn,Bdate,address,sex,supermgr_name,dname;
-    private Double salary;
-    public DataOfEmployee(String name, String ssn,String Bdate,String address,String sex,String supermgr_name,String dname,Double salary ){
-        this.name = name ;
-        this.ssn = ssn;
-        this.Bdate = Bdate;
-        this.address = address;
-        this.sex = sex;
-        this.supermgr_name = supermgr_name;
-        this.dname = dname;
-        this.salary = salary;
+    private ArrayList<String> data;
+    public DataOfEmployee(String name, String ssn,String Bdate,String address,String sex,String supermgr_name,String dname,String salary ){
+        data.add(name);
+        data.add(ssn);
+        data.add(Bdate);
+        data.add(address);
+        data.add(sex);
+        data.add(supermgr_name);
+        data.add(salary);
+        data.add(dname);
     }
     public String toString(){
-        return name+" "+ssn+" "+Bdate+" "+address+" "+sex+" "+" "+salary+" "+supermgr_name+" "+dname;
+        return data.get(0)+" "+data.get(1)+" "+data.get(2)+" "+data.get(3)+" "+data.get(4) +
+                " "+data.get(5)+" "+data.get(6)+" "+data.get(7);
     }
     public String getSsn() {
-        return ssn;
+        return data.get(0);
     }
     public String getDname() {
-        return dname;
+        return data.get(1);
     }
-    public String getName(){ return name; }
-    public String getBdate(){ return Bdate; }
-    public String getAddress(){return address;}
-    public String getSex(){return sex;}
-    public String getSupermgr_name(){ return supermgr_name;}
-    public Double getSalary(){ return salary;}
+    public String getName(){ return data.get(2); }
+    public String getBdate(){ return data.get(3); }
+    public String getAddress(){return data.get(4);}
+    public String getSex(){return data.get(5);}
+    public String getSupermgr_name(){ return data.get(6);}
+    public String getSalary(){ return data.get(7);}
 }

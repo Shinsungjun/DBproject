@@ -42,6 +42,7 @@ public class Window extends JFrame {
     ArrayList<ArrayList<String>> contents;
     ArrayList<Boolean> isAttributeChecked;
     JScrollPane tableScrollPane;
+    String attribute[] = new String[]{"Check", "Name", "Ssn", "Bdate", "Address", "Sex", "Salary", "SuperVisor", "Dname"};
     public Window() throws SQLException {
         super("Company DB");
         setLayout(null);
@@ -183,15 +184,9 @@ public class Window extends JFrame {
     public void init_table(){
         System.out.println("hello!");
         header = new Vector<String>(8);
-        header.add("Check");
-        header.add("Name");
-        header.add("Ssn");
-        header.add("Bdate");
-        header.add("Address");
-        header.add("Sex");
-        header.add("Salary");
-        header.add("SuperVisor");
-        header.add("Dname");//값을 받아서 넘어온 애들로만 만들기
+        for(int i = 0; i < attribute.length; i++){
+            header.add(attribute[i]);
+        }
         content = new Vector<Vector<String>>(10);
         for(int i =0; i<8; i++){
             Vector temp = new Vector(9);
@@ -219,9 +214,11 @@ public class Window extends JFrame {
          //값을 받아서 넘어온 애들로만 만들기
         header.removeAllElements(); //DefaultTableModel가 Array밖에 안되서 ArrayList -> Array 변환
         content.removeAllElements(); //query문을 통해 받은 값들이 모두 contents에 저장되어 있음. contents -> ArrayList<ArrayList<String>>
-        header.add("Check");
-        header.add("Name");
-        header.add("Ssn");
+        for(int i=0; i<contents.size(); i++){
+            if(isAttributeChecked.get(i)){
+                header.add(attribute[i]);
+            }
+        }
         for(int i =0; i<contents.size(); i++){
             Vector temp = new Vector(9);
             for(int j = 0; j<contents.get(i).size(); j++){
@@ -231,24 +228,11 @@ public class Window extends JFrame {
         }
         System.out.println(content);
         System.out.println(header);
-//        for(int i =0; i<contents.size(); i++){
-//            content[i] = contents.get(i).toArray();
-//        } //contents안에 있는 ArrayList 를 Array로 변경하여 2차원 배열로 변경하는 코드. ArrayList<ArrayList<String>> -> Object[][]
         DefaultTableModel m = (DefaultTableModel)table.getModel();
         m.fireTableStructureChanged();
         m.fireTableDataChanged();
-//        dtm = new DefaultTableModel(content, header){
-//            public boolean isCellEditable(int i, int c){
-//                if(c == 0) return true;
-//                return false;
-//            }
-//        };
-//        table = new JTable(dtm);
         table.getColumnModel().getColumn(0).setCellRenderer(new TableCell(table));
         table.getColumnModel().getColumn(0).setCellEditor(new TableCell(table));
-//        tableScrollPane = new JScrollPane(table);
-//        this.add(tableScrollPane);
-//        tableScrollPane.setBounds(20,90,960,310);
     }
 
     public void add_buttons_at_frame(){
@@ -283,6 +267,15 @@ public class Window extends JFrame {
 
         this.add(searchButton);
         deleteButton = new JButton("Delete");
+        deleteButton.addActionListener(e -> {
+            System.out.println(header);
+            if(header.contains("Name") || header.contains("Ssn")){
+                System.out.println("have!");
+            }
+            else {
+                System.out.println("No!");
+            }
+        });
         deleteButton.setBounds(820, 410, 100,40);
         this.add(deleteButton);
         updateButton = new JButton("Update");
