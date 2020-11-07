@@ -107,33 +107,23 @@ public class Window extends JFrame {
             System.out.println(lname + " " + salary);
         }
     }
-    void set_table_db(int total_select) throws SQLException {
+    void set_table_db() throws SQLException {
         contents.clear();
-        String selectStmt[] = new String[]{"CONCAT(employee.fname,\" \",employee.minit,\" \",employee.lname)name,", "employee.ssn,","employee.Bdate,",
-        "employee.Address,", "employee.sex,", "employee.salary,", "if(employee.super_ssn is NULL, 'NULL' , CONCAT(mgr.fname,\" \",mgr.minit,\" \",mgr.lname))supermgr_name, " , "dname \n"};
         String whereDepartment[] = new String[]{"department.dnumber =  employee.dno", "department.dnumber = employee.dno and employee.dno = 1",
                 "department.dnumber = employee.dno and employee.dno = 4","department.dnumber = employee.dno and employee.dno = 5"};
-        String stmt = "";
-        for(int i = 0; i < isAttributeChecked.size(); i++) {
-            if (isAttributeChecked.get(i) && i != 7) {
-                stmt = stmt + selectStmt[i];
-            }
-            if(i == 7){
-                stmt = stmt + selectStmt[i];
-            }
-        }
-
-        String stmt1 = "SELECT distinct " + stmt +
+        String stmt = "select distinct CONCAT(employee.fname,\" \",employee.minit,\" \",employee.lname)name, employee.ssn, employee.Bdate, employee.Address, employee.sex, employee.salary," +
+                " if(employee.super_ssn is NULL, 'NULL' , CONCAT(mgr.fname,\" \",mgr.minit,\" \",mgr.lname))supermgr_name, dname \n" +
                 "FROM employee, employee as mgr, department \n" +
                 "WHERE " + whereDepartment[departComboBox.getSelectedIndex()] + " and (mgr.ssn = employee.super_ssn or employee.super_ssn is NULL)";
 
-        PreparedStatement p = con.prepareStatement(stmt1);
+        PreparedStatement p = con.prepareStatement(stmt);
         ResultSet r = p.executeQuery();
         while(r.next()) {
             ArrayList<String> temp = new ArrayList<>();
             temp.add("false");
-            for (int i = 1; i < total_select + 1; i++) {
-                temp.add(r.getString(i));
+            for (int i = 1; i < isAttributeChecked.size()+1; i++) {
+                if(isAttributeChecked.get(i-1))
+                    temp.add(r.getString(i));
             }
             contents.add(temp);
         }
@@ -249,10 +239,11 @@ public class Window extends JFrame {
             }
             //db 조회를 다시.
             try {
-                set_table_db(total_select);
+                set_table_db();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
+            //다시 조회한 db를 통해 새로운 테이블 만들기
             create_table(header);
         });
 
