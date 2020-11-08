@@ -56,6 +56,9 @@ public class Window extends JFrame {
         add_buttons_at_frame();
         add_texts();
         start = true;
+        for(int i =0; i<attributeCbs.size(); i++){
+            isAttributeChecked.add(true);
+        }
         //frame 크기지정
         setSize(1000, 500);
         //창보이게 하기
@@ -86,6 +89,10 @@ public class Window extends JFrame {
     }
     void init_table_db() throws SQLException{
         contents = new ArrayList<ArrayList<String>>();
+        header = new Vector<String>(8);
+        for(int i = 0; i < attribute.length; i++){
+            header.add(attribute[i]);
+        }
         String stmt1 = "select distinct CONCAT(employee.fname,\" \",employee.minit,\" \",employee.lname)name, employee.ssn, employee.Bdate, employee.Address, employee.sex, employee.salary," +
                 " if(employee.super_ssn is NULL, 'NULL' , CONCAT(mgr.fname,\" \",mgr.minit,\" \",mgr.lname))supermgr_name, dname \n" +
                 "FROM employee, employee as mgr, department \n" +
@@ -188,11 +195,6 @@ public class Window extends JFrame {
         attributeJpanel.setBounds(280,15,500,70);
     }
     public void init_table(){
-        System.out.println("hello!");
-        header = new Vector<String>(8);
-        for(int i = 0; i < attribute.length; i++){
-            header.add(attribute[i]);
-        }
         content = new Vector<Vector<String>>(10);
         for(int i =0; i<contents.size(); i++){
             Vector temp = new Vector(9);
@@ -216,6 +218,7 @@ public class Window extends JFrame {
                 header.add(attribute[i]);
             }
         }
+
         for(int i =0; i<contents.size(); i++){
             Vector temp = new Vector(9);
             for(int j = 0; j<contents.get(i).size(); j++){
@@ -258,15 +261,31 @@ public class Window extends JFrame {
         this.add(searchButton);
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> {
+            isAttributeChecked.clear();
+            //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
+            for(int i =0; i<attributeCbs.size(); i++){
+                if(attributeCbs.get(i).isSelected()){
+                    isAttributeChecked.add(true);
+                }
+                else isAttributeChecked.add(false);
+            }
             if(start){
                 try {
                     delete_db();
                     start = false;
+                    set_table_db();
+                    create_table();
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
             }
             else {
+                header.clear();
+                for(int i=0; i<isAttributeChecked.size(); i++){
+                    if(isAttributeChecked.get(i)){
+                        header.add(attribute[i]);
+                    }
+                }
                 if(header.contains("Name") || header.contains("Ssn")){
                     try {
                         delete_db();
@@ -274,27 +293,49 @@ public class Window extends JFrame {
                         throwables.printStackTrace();
                     }
                 }
+                else{
+                    System.out.println("you can't delete without ssn or Name");
+                }
             }
         });
         deleteButton.setBounds(820, 410, 100,40);
         this.add(deleteButton);
         updateButton = new JButton("Update");
         updateButton.addActionListener(e -> {
+            isAttributeChecked.clear();
+            //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
+            for(int i =0; i<attributeCbs.size(); i++){
+                if(attributeCbs.get(i).isSelected()){
+                    isAttributeChecked.add(true);
+                }
+                else isAttributeChecked.add(false);
+            }
             if(start){
                 try {
                     update_db();
+                    init_table_db();
+                    create_table();
                     start = false;
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
             }
             else {
+                header.clear();
+                for(int i=0; i<isAttributeChecked.size(); i++){
+                    if(isAttributeChecked.get(i)){
+                        header.add(attribute[i]);
+                    }
+                }
                 if(header.contains("Name") || header.contains("Ssn")){
                     try {
                         update_db();
                     } catch (SQLException throwables) {
                         throwables.printStackTrace();
                     }
+                }
+                else {
+                    System.out.println("you can't update without Ssn or Name");
                 }
             }
         });
@@ -314,8 +355,8 @@ public class Window extends JFrame {
                 "where ssn="+ssn+" and (ssn not in (select mgr_ssn " +
                 "from DEPARTMENT) or super_ssn is null)";
         PreparedStatement p = con.prepareStatement(stmt);
-        System.out.println(p);
         p.executeUpdate();
+        set_table_db();
         create_table();
     }
 
@@ -327,6 +368,7 @@ public class Window extends JFrame {
         p.setString(1, salary);
         p.setString(2, ssn);
         p.executeUpdate();
+        set_table_db();
         create_table();
     }
 }
