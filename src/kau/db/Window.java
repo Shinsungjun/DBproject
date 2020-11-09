@@ -174,6 +174,7 @@ public class Window extends JFrame {
         attributeCbs = new ArrayList<>();
         NameCb = new JCheckBox("Name", true);
         SsnCb = new JCheckBox("Ssn", true);
+        SsnCb.setEnabled(false);
         BdateCb = new JCheckBox("Bdate", true);
         AddressCb = new JCheckBox("Address", true);
         SexCb = new JCheckBox("Sex", true);
@@ -261,40 +262,56 @@ public class Window extends JFrame {
         this.add(searchButton);
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> {
-            isAttributeChecked.clear();
-            //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
-            for(int i =0; i<attributeCbs.size(); i++){
-                if(attributeCbs.get(i).isSelected()){
-                    isAttributeChecked.add(true);
+            boolean check = false;
+            for(int i =0; i < contents.size(); i++){
+                if(contents.get(i).contains(SsnTextField.getText())) {
+                    check = true;
                 }
-                else isAttributeChecked.add(false);
             }
-            if(start){
-                try {
-                    delete_db();
-                    start = false;
-                    set_table_db();
-                    create_table();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
+            if(!check){
+                JOptionPane.showMessageDialog(null, "현재 입력하신 \""+SsnTextField.getText()+"\" Ssn은 table에 존재하지 않습니다.");
             }
             else {
-                header.clear();
-                for(int i=0; i<isAttributeChecked.size(); i++){
-                    if(isAttributeChecked.get(i)){
-                        header.add(attribute[i]);
+                try {
+                    Double checkSsn = Double.parseDouble(SsnTextField.getText());
+                    // TODO: 수정 기능 적용
+                    System.out.println("급여 수정");
+                    isAttributeChecked.clear();
+                    //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
+                    for (int i = 0; i < attributeCbs.size(); i++) {
+                        if (attributeCbs.get(i).isSelected()) {
+                            isAttributeChecked.add(true);
+                        } else isAttributeChecked.add(false);
                     }
-                }
-                if(header.contains("Name") || header.contains("Ssn")){
-                    try {
-                        delete_db();
-                    } catch (SQLException throwables) {
-                        throwables.printStackTrace();
+                    if (start) {
+                        try {
+                            delete_db();
+                            init_table_db();
+                            create_table();
+                            start = false;
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
+                    } else {
+                        header.clear();
+                        for (int i = 0; i < isAttributeChecked.size(); i++) {
+                            if (isAttributeChecked.get(i)) {
+                                header.add(attribute[i]);
+                            }
+                        }
+                        if (header.contains("Name") || header.contains("Ssn")) {
+                            try {
+                                update_db();
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        } else {
+                            System.out.println("you can't update without Ssn or Name");
+                        }
                     }
-                }
-                else{
-                    System.out.println("you can't delete without ssn or Name");
+                } catch (NumberFormatException exception) {
+                    System.out.println("입력값 형태를 다시 확인해주세요");
+                    JOptionPane.showMessageDialog(null, "정확한 Ssn을 입력해주세요");
                 }
             }
         });
@@ -302,40 +319,57 @@ public class Window extends JFrame {
         this.add(deleteButton);
         updateButton = new JButton("Update");
         updateButton.addActionListener(e -> {
-            isAttributeChecked.clear();
-            //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
-            for(int i =0; i<attributeCbs.size(); i++){
-                if(attributeCbs.get(i).isSelected()){
-                    isAttributeChecked.add(true);
+            boolean check = false;
+            for(int i =0; i < contents.size(); i++){
+                if(contents.get(i).contains(SsnTextField.getText())) {
+                    check = true;
                 }
-                else isAttributeChecked.add(false);
             }
-            if(start){
-                try {
-                    update_db();
-                    init_table_db();
-                    create_table();
-                    start = false;
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
+            if(!check){
+                JOptionPane.showMessageDialog(null, "현재 입력하신 \""+SsnTextField.getText()+"\" Ssn은 table에 존재하지 않습니다.");
             }
             else {
-                header.clear();
-                for(int i=0; i<isAttributeChecked.size(); i++){
-                    if(isAttributeChecked.get(i)){
-                        header.add(attribute[i]);
+                try {
+                    Double checkSsn = Double.parseDouble(SsnTextField.getText());
+                    Double checkSalary = Double.parseDouble(salaryTextField.getText());
+                    // TODO: 수정 기능 적용
+                    System.out.println("급여 수정");
+                    isAttributeChecked.clear();
+                    //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
+                    for (int i = 0; i < attributeCbs.size(); i++) {
+                        if (attributeCbs.get(i).isSelected()) {
+                            isAttributeChecked.add(true);
+                        } else isAttributeChecked.add(false);
                     }
-                }
-                if(header.contains("Name") || header.contains("Ssn")){
-                    try {
-                        update_db();
-                    } catch (SQLException throwables) {
-                        throwables.printStackTrace();
+                    if (start) {
+                        try {
+                            update_db();
+                            init_table_db();
+                            create_table();
+                            start = false;
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
+                    } else {
+                        header.clear();
+                        for (int i = 0; i < isAttributeChecked.size(); i++) {
+                            if (isAttributeChecked.get(i)) {
+                                header.add(attribute[i]);
+                            }
+                        }
+                        if (header.contains("Name") || header.contains("Ssn")) {
+                            try {
+                                update_db();
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        } else {
+                            System.out.println("you can't update without Ssn or Name");
+                        }
                     }
-                }
-                else {
-                    System.out.println("you can't update without Ssn or Name");
+                } catch (NumberFormatException exception) {
+                    System.out.println("입력값 형태를 다시 확인해주세요");
+                    JOptionPane.showMessageDialog(null, "New Salary는 숫자로 입력해주세요");
                 }
             }
         });
