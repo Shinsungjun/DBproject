@@ -29,7 +29,6 @@ public class Window extends JFrame {
     JButton updateButton;
     JTextField salaryTextField;
     JTextField SsnTextField;
-    JLabel chooseText;
     JLabel numberofPeople;
     JLabel numberOfPeopleText;
     JLabel newSalaryText;
@@ -144,7 +143,6 @@ public class Window extends JFrame {
             }
             contents.add(temp);
         }
-        System.out.println(contents.size());
         numberofPeople.setText(String.valueOf(contents.size()));
     }
 
@@ -162,12 +160,9 @@ public class Window extends JFrame {
         newSalaryText.setBounds(615, 450, 100, 20);
         numberOfPeopleText = new JLabel("Number of People : ");
         this.add(numberOfPeopleText);
-        numberOfPeopleText.setBounds(30, 410, 200, 20);
-        numberofPeople.setBounds(155, 410,200,20);
+        numberOfPeopleText.setBounds(30, 410, 200, 40);
+        numberofPeople.setBounds(155, 410,200,40);
         this.add(numberofPeople);
-        chooseText = new JLabel("Choose :");
-        this.add(chooseText);
-        chooseText.setBounds(30,430,100,20);
     }
 
     public void add_checkbox_at_atrributeJpanel(){
@@ -213,7 +208,7 @@ public class Window extends JFrame {
         tableScrollPane.setBounds(20,90,960,310);
     }
     public void create_table() {
-         //값을 받아서 넘어온 애들로만 만들기
+        //값을 받아서 넘어온 애들로만 만들기
         header.removeAllElements();
         content.removeAllElements();
         for(int i=0; i<isAttributeChecked.size(); i++){
@@ -221,8 +216,6 @@ public class Window extends JFrame {
                 header.add(attribute[i]);
             }
         }
-        System.out.println("in create table");
-        System.out.println(header);
         for(int i =0; i<contents.size(); i++){
             Vector temp = new Vector(9);
             for(int j = 0; j<contents.get(i).size(); j++){
@@ -236,10 +229,14 @@ public class Window extends JFrame {
     }
 
     public void add_buttons_at_frame(){
+
+
         departComboBox = new JComboBox<String>(department);
         isAttributeChecked = new ArrayList<>();
         this.add(departComboBox);
         departComboBox.setBounds(10,35,200,30);
+
+
         searchButton = new JButton("Search");
         searchButton.setBounds(820, 28, 100,40);
         ArrayList<String> header = new ArrayList<>();
@@ -261,8 +258,9 @@ public class Window extends JFrame {
             //다시 조회한 db를 통해 새로운 테이블 만들기
             create_table();
         });
-
         this.add(searchButton);
+
+
         deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> {
             boolean check = false;
@@ -292,9 +290,6 @@ public class Window extends JFrame {
                         }
                     }
                     try {
-                        System.out.println("delete");
-                        System.out.println(isAttributeChecked);
-                        System.out.println(header);
                         delete_db();
                         set_table_db();
                         create_table();
@@ -310,6 +305,8 @@ public class Window extends JFrame {
         });
         deleteButton.setBounds(820, 410, 100,40);
         this.add(deleteButton);
+
+
         updateButton = new JButton("Update");
         updateButton.addActionListener(e -> {
             boolean check = false;
@@ -341,7 +338,6 @@ public class Window extends JFrame {
                     }
                     try {
                         update_db();
-                        System.out.println("update");
                         set_table_db();
                         create_table();
                     } catch (SQLException throwables) {
@@ -363,14 +359,19 @@ public class Window extends JFrame {
         this.add(SsnTextField);
         this.add(salaryTextField);
     }
+
     public void delete_db() throws SQLException {
         String ssn = SsnTextField.getText();
-        System.out.println(ssn);
-        String stmt = "delete from EMPLOYEE " +
-                "where ssn="+ssn+" and (ssn not in (select mgr_ssn " +
-                "from DEPARTMENT) or super_ssn is null)";
-        PreparedStatement p = con.prepareStatement(stmt);
-        p.executeUpdate();
+        try {
+            String stmt = "delete from EMPLOYEE " +
+                    "where ssn=" + ssn + " and (ssn not in (select mgr_ssn " +
+                    "from DEPARTMENT) or super_ssn is null)";
+            PreparedStatement p = con.prepareStatement(stmt);
+            p.executeUpdate();
+        }catch (SQLException e) {
+            System.err.println("맡고있는 부서가 있어 삭제할 수 없는 직원입니다.");
+            JOptionPane.showMessageDialog(null, "매니져 직원이므로 삭제할 수 없습니다.");
+        }
     }
 
     public void update_db() throws SQLException {
