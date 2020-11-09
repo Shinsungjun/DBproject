@@ -113,6 +113,7 @@ public class Window extends JFrame {
             numberofPeople = new JLabel(c.getString(1));
         }
     }
+
     void test_db() throws SQLException{
         String stmt1 = "select Lname, Salary from EMPLOYEE";
         PreparedStatement p = con.prepareStatement(stmt1);
@@ -143,6 +144,7 @@ public class Window extends JFrame {
             }
             contents.add(temp);
         }
+        System.out.println(contents.size());
         numberofPeople.setText(String.valueOf(contents.size()));
     }
 
@@ -219,7 +221,8 @@ public class Window extends JFrame {
                 header.add(attribute[i]);
             }
         }
-
+        System.out.println("in create table");
+        System.out.println(header);
         for(int i =0; i<contents.size(); i++){
             Vector temp = new Vector(9);
             for(int j = 0; j<contents.get(i).size(); j++){
@@ -274,8 +277,7 @@ public class Window extends JFrame {
             else {
                 try {
                     Double checkSsn = Double.parseDouble(SsnTextField.getText());
-                    // TODO: 수정 기능 적용
-                    System.out.println("급여 수정");
+                    System.out.println("직원 삭제");
                     isAttributeChecked.clear();
                     //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
                     for (int i = 0; i < attributeCbs.size(); i++) {
@@ -283,33 +285,24 @@ public class Window extends JFrame {
                             isAttributeChecked.add(true);
                         } else isAttributeChecked.add(false);
                     }
-                    if (start) {
-                        try {
-                            delete_db();
-                            init_table_db();
-                            create_table();
-                            start = false;
-                        } catch (SQLException throwables) {
-                            throwables.printStackTrace();
-                        }
-                    } else {
-                        header.clear();
-                        for (int i = 0; i < isAttributeChecked.size(); i++) {
-                            if (isAttributeChecked.get(i)) {
-                                header.add(attribute[i]);
-                            }
-                        }
-                        if (header.contains("Name") || header.contains("Ssn")) {
-                            try {
-                                update_db();
-                            } catch (SQLException throwables) {
-                                throwables.printStackTrace();
-                            }
-                        } else {
-                            System.out.println("you can't update without Ssn or Name");
+                    header.clear();
+                    for (int i = 0; i < isAttributeChecked.size(); i++) {
+                        if (isAttributeChecked.get(i)) {
+                            header.add(attribute[i]);
                         }
                     }
-                } catch (NumberFormatException exception) {
+                    try {
+                        System.out.println("delete");
+                        System.out.println(isAttributeChecked);
+                        System.out.println(header);
+                        delete_db();
+                        set_table_db();
+                        create_table();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                }
+                catch (NumberFormatException exception) {
                     System.out.println("입력값 형태를 다시 확인해주세요");
                     JOptionPane.showMessageDialog(null, "정확한 Ssn을 입력해주세요");
                 }
@@ -332,7 +325,6 @@ public class Window extends JFrame {
                 try {
                     Double checkSsn = Double.parseDouble(SsnTextField.getText());
                     Double checkSalary = Double.parseDouble(salaryTextField.getText());
-                    // TODO: 수정 기능 적용
                     System.out.println("급여 수정");
                     isAttributeChecked.clear();
                     //모든 attribute 모두 조회 후 check 된 것만 보여주는 식으로.
@@ -341,33 +333,22 @@ public class Window extends JFrame {
                             isAttributeChecked.add(true);
                         } else isAttributeChecked.add(false);
                     }
-                    if (start) {
-                        try {
-                            update_db();
-                            init_table_db();
-                            create_table();
-                            start = false;
-                        } catch (SQLException throwables) {
-                            throwables.printStackTrace();
-                        }
-                    } else {
-                        header.clear();
-                        for (int i = 0; i < isAttributeChecked.size(); i++) {
-                            if (isAttributeChecked.get(i)) {
-                                header.add(attribute[i]);
-                            }
-                        }
-                        if (header.contains("Name") || header.contains("Ssn")) {
-                            try {
-                                update_db();
-                            } catch (SQLException throwables) {
-                                throwables.printStackTrace();
-                            }
-                        } else {
-                            System.out.println("you can't update without Ssn or Name");
+                    header.clear();
+                    for (int i = 0; i < isAttributeChecked.size(); i++) {
+                        if (isAttributeChecked.get(i)) {
+                            header.add(attribute[i]);
                         }
                     }
-                } catch (NumberFormatException exception) {
+                    try {
+                        update_db();
+                        System.out.println("update");
+                        set_table_db();
+                        create_table();
+                    } catch (SQLException throwables) {
+                        throwables.printStackTrace();
+                    }
+                }
+                catch (NumberFormatException exception) {
                     System.out.println("입력값 형태를 다시 확인해주세요");
                     JOptionPane.showMessageDialog(null, "New Salary는 숫자로 입력해주세요");
                 }
@@ -390,8 +371,6 @@ public class Window extends JFrame {
                 "from DEPARTMENT) or super_ssn is null)";
         PreparedStatement p = con.prepareStatement(stmt);
         p.executeUpdate();
-        set_table_db();
-        create_table();
     }
 
     public void update_db() throws SQLException {
@@ -402,7 +381,5 @@ public class Window extends JFrame {
         p.setString(1, salary);
         p.setString(2, ssn);
         p.executeUpdate();
-        set_table_db();
-        create_table();
     }
 }
